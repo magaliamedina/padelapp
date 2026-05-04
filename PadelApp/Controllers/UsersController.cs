@@ -31,7 +31,8 @@ namespace PadelApp.Controllers
                 Name = request.Name,
                 Email = request.Email,
                 Alias = request.Alias,
-                Number = request.Number
+                Number = request.Number,
+                Gender = request.Gender
             };
 
             _context.Users.Add(user);

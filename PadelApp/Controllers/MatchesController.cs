@@ -32,13 +32,15 @@ namespace PadelApp.Controllers
                 Date = m.Date,
                 Location = m.Location,
                 MaxPlayers = m.MaxPlayers,
+                MatchType = m.MatchType.ToString(),
 
                 ActivePlayers = m.Bookings
                     .Where(b => b.Status == BookingStatus.Active)
                     .Select(b => new PlayerDto
                     {
                         UserId = b.UserId,
-                        Name = b.User.Name
+                        Name = b.User.Name,
+                        Gender = b.User.Gender.ToString()
                     }).ToList(),
 
                 WaitingReplacement = m.Bookings
@@ -68,7 +70,8 @@ namespace PadelApp.Controllers
             {
                 Date = request.Date,
                 Location = request.Location,
-                MaxPlayers = request.MaxPlayers
+                MaxPlayers = request.MaxPlayers,
+                MatchType = request.MatchType   
             };
 
             _context.Matches.Add(match);
@@ -80,6 +83,7 @@ namespace PadelApp.Controllers
                 Date = match.Date,
                 Location = match.Location,
                 MaxPlayers = match.MaxPlayers,
+                MatchType = match.MatchType.ToString(),
                 ActivePlayers = new List<PlayerDto>(),
                 WaitingReplacement = new List<PlayerDto>(),
                 CancelledPlayers = new List<PlayerDto>()    
@@ -98,12 +102,24 @@ namespace PadelApp.Controllers
             if (match == null)
                 return NotFound("Match not found");
 
+            var user = _context.Users.FirstOrDefault(u => u.Id == request.UserId);
+
+            if (user == null)
+                return NotFound("User not found");
+
+            // validación según tipo de partido
+            if (match.MatchType == MatchTypes.Male && user.Gender != Gender.Male)
+                return BadRequest("Only male players allowed");
+
+            if (match.MatchType == MatchTypes.Female && user.Gender != Gender.Female)
+                return BadRequest("Only female players allowed");
+
             // validar si ya está
             var alreadyJoined = match.Bookings
                 .Any(b => b.UserId == request.UserId && b.Status == BookingStatus.Active);
 
             if (alreadyJoined)
-                return BadRequest("User already joined");
+                return BadRequest("User already joined");            
 
             // BUSCAR alguien para reemplazar
             var replacement = match.Bookings

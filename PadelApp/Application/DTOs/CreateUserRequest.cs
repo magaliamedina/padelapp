@@ -1,4 +1,6 @@
-﻿namespace PadelApp.Application.DTOs
+﻿using PadelApp.Domain.Enums;
+
+namespace PadelApp.Application.DTOs
 {
     public class CreateUserRequest
     {
@@ -7,5 +9,6 @@
 
         public string? Alias { get; set; }
         public string? Number { get; set; }
+        public Gender Gender { get; set; }
     }
 }
